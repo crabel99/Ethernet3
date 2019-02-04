@@ -44,6 +44,7 @@
 #define ethernetudp3_h
 
 #include <Udp.h>
+#include "utility/w5500.h"
 
 #define UDP_TX_PACKET_MAX_SIZE 24
 
@@ -110,7 +111,11 @@ public:
   virtual bool getBroadcastBlock(); // get Broadcast blocking state
   virtual void setUnicastBlock(bool block = false); // set Unicast blocking, only  when socketin Multicast mode
   virtual bool getUnicastBlock();  // get Unicast blocking state  
-  
+
+  virtual void clearInterrupt();
+  virtual void enableInterrupt();
+  virtual void disableInterrupt();
+  virtual uint8_t readInterrupt();
 };
 
 #endif

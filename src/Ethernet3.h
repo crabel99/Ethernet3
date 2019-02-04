@@ -100,6 +100,11 @@ public:
 
   void setHostname(char* hostname);
   
+  void clearInterrupt();
+  void enableInterrupt(uint8_t type);
+  void disableInterrupt(uint8_t type);
+  uint8_t readInterrupt();
+  
   IPAddress localIP();
   IPAddress subnetMask();
   IPAddress gatewayIP();

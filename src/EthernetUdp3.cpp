@@ -291,3 +291,29 @@ bool EthernetUDP::getUnicastBlock() {
   return bitRead(value, 4);
 }
 
+void EthernetUDP::enableInterrupt() {
+  if (_sock >= MAX_SOCK_NUM)
+    return;
+  EthernetUDP::clearInterrupt();
+  uint8_t val = w5500.readSIMR();
+  w5500.writeSIMR(val | (1 << _sock));
+}
+
+void EthernetUDP::disableInterrupt(){
+  if (_sock >= MAX_SOCK_NUM)
+    return;
+  uint8_t val = w5500.readSIMR();
+  w5500.writeSIMR(val & ~(1 << _sock));
+}
+
+void EthernetUDP::clearInterrupt(){
+  if (_sock >= MAX_SOCK_NUM)
+    return;
+  w5500.writeSnIR(_sock, 0xff);
+}
+
+uint8_t EthernetUDP::readInterrupt() {
+  if (_sock >= MAX_SOCK_NUM)
+    return;
+  return w5500.readSnIR(_sock);
+}

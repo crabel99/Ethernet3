@@ -1,11 +1,8 @@
-#include "utility/w5500.h"
 #include "utility/socket.h"
 
 extern "C" {
-  #include "string.h"
+  #include <string.h>
 }
-
-#include "Arduino.h"
 
 #include "Ethernet3.h"
 #include "EthernetClient.h"
@@ -199,4 +196,31 @@ bool EthernetClient::getNoDelayedACK() {
   uint8_t value;
   value = w5500.readSnMR(_sock);
   return bitRead(value, 5);
+}
+
+void EthernetClient::enableInterrupt() {
+  if (_sock >= MAX_SOCK_NUM)
+    return;
+  EthernetClient::clearInterrupt();
+  uint8_t val = w5500.readSIMR();
+  w5500.writeSIMR(val | (1 << _sock));
+}
+
+void EthernetClient::disableInterrupt(){
+  if (_sock >= MAX_SOCK_NUM)
+    return;
+  uint8_t val = w5500.readSIMR();
+  w5500.writeSIMR(val & ~(1 << _sock));
+}
+
+void EthernetClient::clearInterrupt(){
+  if (_sock >= MAX_SOCK_NUM)
+    return;
+  w5500.writeSnIR(_sock, 0xff);
+}
+
+uint8_t EthernetClient::readInterrupt() {
+  if (_sock >= MAX_SOCK_NUM)
+    return;
+  return w5500.readSnIR(_sock);
 }

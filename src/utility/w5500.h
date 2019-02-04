@@ -16,7 +16,6 @@
 
 #define MAX_SOCK_NUM 8
 
-
 #include <Arduino.h>
 #include <SPI.h>
 
@@ -34,19 +33,15 @@ public:
   static const uint8_t IND   = 0x01;
 };
 */
-/*
+
 class IR {
 public:
   static const uint8_t CONFLICT = 0x80;
   static const uint8_t UNREACH  = 0x40;
   static const uint8_t PPPoE    = 0x20;
-  static const uint8_t SOCK0    = 0x01;
-  static const uint8_t SOCK1    = 0x02;
-  static const uint8_t SOCK2    = 0x04;
-  static const uint8_t SOCK3    = 0x08;
-  static inline uint8_t SOCK(SOCKET ch) { return (0x01 << ch); };
+  static const uint8_t MP       = 0x10;
 };
-*/
+
 
 class SnMR {
 public:
@@ -233,18 +228,22 @@ private:
   }
 
 public:
-  __GP_REGISTER8 (MR,     0x0000);    // Mode
-  __GP_REGISTER_N(GAR,    0x0001, 4); // Gateway IP address
-  __GP_REGISTER_N(SUBR,   0x0005, 4); // Subnet mask address
-  __GP_REGISTER_N(SHAR,   0x0009, 6); // Source MAC address
-  __GP_REGISTER_N(SIPR,   0x000F, 4); // Source IP address
-  __GP_REGISTER8 (IR,     0x0015);    // Interrupt
-  __GP_REGISTER8 (IMR,    0x0016);    // Interrupt Mask
-  __GP_REGISTER16(RTR,    0x0019);    // Timeout address
-  __GP_REGISTER8 (RCR,    0x001B);    // Retry count
-  __GP_REGISTER_N(UIPR,   0x0028, 4); // Unreachable IP address in UDP mode
-  __GP_REGISTER16(UPORT,  0x002C);    // Unreachable Port address in UDP mode
-  __GP_REGISTER8 (PHYCFGR,     0x002E);    // PHY Configuration register, default value: 0b 1011 1xxx
+  __GP_REGISTER8 (MR,       0x0000);    // [0x00] Mode
+  __GP_REGISTER_N(GAR,      0x0001, 4); // [0x00] Gateway IP address
+  __GP_REGISTER_N(SUBR,     0x0005, 4); // [0x00] Subnet mask address
+  __GP_REGISTER_N(SHAR,     0x0009, 6); // [0x00] Source MAC address
+  __GP_REGISTER_N(SIPR,     0x000F, 4); // [0x00] Source IP address
+  __GP_REGISTER16(INTLEVEL, 0x0013);    // [0x0000] Interrupt Low Level Timer Register
+  __GP_REGISTER8 (IR,       0x0015);    // [0x00] Interrupt
+  __GP_REGISTER8 (IMR,      0x0016);    // [0x00] Interrupt Mask
+  __GP_REGISTER8 (SIR,      0x0017);    // [0x00] Socket Interrupt
+  __GP_REGISTER8 (SIMR,     0x0018);    // [0x00] Socket Interrupt Mask
+  __GP_REGISTER16(RTR,      0x0019);    // [0x07D0] Timeout address
+  __GP_REGISTER8 (RCR,      0x001B);    // [0x08] Retry count
+  __GP_REGISTER_N(UIPR,     0x0028, 4); // [0x00] Unreachable IP address in UDP mode
+  __GP_REGISTER16(UPORT,    0x002C);    // [0x0000] Unreachable Port address in UDP mode
+  __GP_REGISTER8 (PHYCFGR,  0x002E);    // [0b10111XXX] PHY Configuration register
+  __GP_REGISTER8 (VERSIONR, 0x0039);    // [0x04] Chip Version
 
 
 #undef __GP_REGISTER8
@@ -304,26 +303,28 @@ private:
   }
 
 public:
-  __SOCKET_REGISTER8(SnMR,        0x0000)        // Mode
-  __SOCKET_REGISTER8(SnCR,        0x0001)        // Command
-  __SOCKET_REGISTER8(SnIR,        0x0002)        // Interrupt
-  __SOCKET_REGISTER8(SnSR,        0x0003)        // Status
-  __SOCKET_REGISTER16(SnPORT,     0x0004)        // Source Port
-  __SOCKET_REGISTER_N(SnDHAR,     0x0006, 6)     // Destination Hardw Addr
-  __SOCKET_REGISTER_N(SnDIPR,     0x000C, 4)     // Destination IP Addr
-  __SOCKET_REGISTER16(SnDPORT,    0x0010)        // Destination Port
-  __SOCKET_REGISTER16(SnMSSR,     0x0012)        // Max Segment Size
-  __SOCKET_REGISTER8(SnPROTO,     0x0014)        // Protocol in IP RAW Mode
-  __SOCKET_REGISTER8(SnTOS,       0x0015)        // IP TOS
-  __SOCKET_REGISTER8(SnTTL,       0x0016)        // IP TTL
-  __SOCKET_REGISTER8(SnRX_SIZE,   0x001E)        // RX Memory Size
-  __SOCKET_REGISTER8(SnTX_SIZE,   0x001F)        // TX Memory Size
-  __SOCKET_REGISTER16(SnTX_FSR,   0x0020)        // TX Free Size
-  __SOCKET_REGISTER16(SnTX_RD,    0x0022)        // TX Read Pointer
-  __SOCKET_REGISTER16(SnTX_WR,    0x0024)        // TX Write Pointer
-  __SOCKET_REGISTER16(SnRX_RSR,   0x0026)        // RX Free Size
-  __SOCKET_REGISTER16(SnRX_RD,    0x0028)        // RX Read Pointer
-  __SOCKET_REGISTER16(SnRX_WR,    0x002A)        // RX Write Pointer (supported?)
+  __SOCKET_REGISTER8(SnMR,        0x0000)    // [0x00] Mode
+  __SOCKET_REGISTER8(SnCR,        0x0001)    // [0x00] Command
+  __SOCKET_REGISTER8(SnIR,        0x0002)    // [0x00] Interrupt
+  __SOCKET_REGISTER8(SnSR,        0x0003)    // [0x00] Status
+  __SOCKET_REGISTER16(SnPORT,     0x0004)    // [0x0000] Source Port
+  __SOCKET_REGISTER_N(SnDHAR,     0x0006, 6) // [0x00] Destination Hardw Addr
+  __SOCKET_REGISTER_N(SnDIPR,     0x000C, 4) // [0x00] Destination IP Addr
+  __SOCKET_REGISTER16(SnDPORT,    0x0010)    // [0x0000] Destination Port
+  __SOCKET_REGISTER16(SnMSSR,     0x0012)    // [0x0000] Max Segment Size
+  __SOCKET_REGISTER8(SnTOS,       0x0015)    // [0x00] IP TOS
+  __SOCKET_REGISTER8(SnTTL,       0x0016)    // [0x80] IP TTL
+  __SOCKET_REGISTER8(SnRX_SIZE,   0x001E)    // [0x02] RX Memory Size
+  __SOCKET_REGISTER8(SnTX_SIZE,   0x001F)    // [0x02] TX Memory Size
+  __SOCKET_REGISTER16(SnTX_FSR,   0x0020)    // [0x0800] TX Free Size
+  __SOCKET_REGISTER16(SnTX_RD,    0x0022)    // [0x0000] TX Read Pointer
+  __SOCKET_REGISTER16(SnTX_WR,    0x0024)    // [0x0000] TX Write Pointer
+  __SOCKET_REGISTER16(SnRX_RSR,   0x0026)    // [0x0000] RX Free Size
+  __SOCKET_REGISTER16(SnRX_RD,    0x0028)    // [0x0000] RX Read Pointer
+  __SOCKET_REGISTER16(SnRX_WR,    0x002A)    // [0x0000] RX Write Pointer (supported?)
+  __SOCKET_REGISTER8(Sn_IMR,      0x002C)    // [0xFF] Socket Interrupt Mask
+  __SOCKET_REGISTER16(Sn_FRAG,    0x002D)    // [0x4000] Socket Fragment
+  __SOCKET_REGISTER8(Sn_KPALVTR,  0x002F)    // [0x00] Socket Keep Alive Time
 
 #undef __SOCKET_REGISTER8
 #undef __SOCKET_REGISTER16

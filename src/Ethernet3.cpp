@@ -206,6 +206,51 @@ bool EthernetClass::WoL() {
   return bitRead(val, 5);
   }
 
+void EthernetClass::enableInterrupt(uint8_t type) {
+  EthernetClass::clearInterrupt();
+  uint8_t val = w5500.readIMR();
+  switch (type) {
+    case IR::MP: // Magic Packet
+      w5500.writeIMR(val | IR::MP);
+    break;
+    case IR::PPPoE: // PPPoE Connection Close
+      w5500.writeIMR(val | IR::PPPoE);
+    break;
+    case IR::UNREACH: // Destination unreachable
+      w5500.writeIMR(val | IR::UNREACH);
+    break;
+    case IR::CONFLICT: // IP Conflict
+      w5500.writeIMR(val | IR::CONFLICT);
+    break;
+  }
+}
+
+void EthernetClass::disableInterrupt(uint8_t type) {
+  uint8_t val = w5500.readIMR();
+  switch (type) {
+    case IR::MP: // Magic Packet
+      w5500.writeIMR(val & ~IR::MP);
+    break;
+    case IR::PPPoE: // PPPoE Connection Close
+      w5500.writeIMR(val & ~IR::PPPoE);
+    break;
+    case IR::UNREACH: // Destination unreachable
+      w5500.writeIMR(val & ~IR::UNREACH);
+    break;
+    case IR::CONFLICT: // IP Conflict
+      w5500.writeIMR(val & ~IR::CONFLICT);
+    break;
+  }
+}
+
+void EthernetClass::clearInterrupt() {
+  w5500.writeIR(0xff);
+}
+
+uint8_t EthernetClass::readInterrupt() {
+  return w5500.readIR() & w5500.readIMR();
+}
+
 void EthernetClass::phyMode(phyMode_t mode) {
   uint8_t val = w5500.getPHYCFGR();
   bitWrite(val, 6, 1);

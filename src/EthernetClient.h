@@ -1,11 +1,15 @@
 #ifndef ethernetclient_h
 #define ethernetclient_h
-#include "Arduino.h"	
-#include "Print.h"
-#include "Client.h"
-#include "IPAddress.h"
+
+#include "utility/w5500.h"
+#include <Print.h>
+#include <Client.h>
+#include <IPAddress.h>
 
 class EthernetClient : public Client {
+private:
+  static uint16_t _srcport;
+  uint8_t _sock;
 
 public:
   EthernetClient();
@@ -42,13 +46,16 @@ public:
   // get the state of 'no Delayed ACK' option
   virtual bool getNoDelayedACK();
 
+  virtual void clearInterrupt();
+  virtual void enableInterrupt();
+  virtual void disableInterrupt();
+  virtual uint8_t readInterrupt();
+
   friend class EthernetServer;
   
   using Print::write;
 
-private:
-  static uint16_t _srcport;
-  uint8_t _sock;
+
 };
 
 #endif
